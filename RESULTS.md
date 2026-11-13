@@ -33,3 +33,11 @@ Model: `Qwen/Qwen2.5-0.5B`. Data: `coastalcph/lex_glue`, config `case_hold`.
 
 The median context has 12 tokens after `<HOLDING>`, so cutting from the left keeps the citation.
 
+## Zero-shot
+
+`python eval.py --split validation`
+
+- **38.38% on dev** (1,497 of 3,900). A random pick scores 20.
+- Picks: A 503 · B 1,291 · C 1,638 · D 206 · E 262. Correct answers are spread evenly (760 to 804 each).
+- 98 s, peak VRAM 1.42 GiB.
+
