@@ -57,11 +57,18 @@ if __name__ == "__main__":
     p.add_argument("--max_len", type=int, default=640)
     p.add_argument("--batch_size", type=int, default=16)
     p.add_argument("--n", type=int, default=None, help="first n examples only")
+    p.add_argument("--adapter", default=None, help="adapter.pt from train.py; without it, zero-shot")
+    p.add_argument("--r", type=int, default=16)
+    p.add_argument("--alpha", type=float, default=32)
     args = p.parse_args()
 
     device = "cuda"
     tok = AutoTokenizer.from_pretrained(args.model)
     model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.bfloat16).to(device)
+    if args.adapter:
+        from lora import load_adapter
+
+        load_adapter(model, args.adapter, args.r, args.alpha)
     split = load()[args.split]
     if args.n:
         split = split.select(range(args.n))
@@ -71,7 +78,7 @@ if __name__ == "__main__":
     preds, labels = evaluate(model, tok, split, args.max_len, args.batch_size, device)
     secs = time.time() - t0
 
-    print(f"{args.model} zero-shot, {args.split}, n={len(labels)}, max_len={args.max_len}")
+    print(f"{args.model} {args.adapter or 'zero-shot'}, {args.split}, n={len(labels)}, max_len={args.max_len}")
     print(f"accuracy: {100 * (preds == labels).mean():.2f}%  ({(preds == labels).sum()} of {len(labels)})")
     print("picked :", {l: int((preds == i).sum()) for i, l in enumerate(LETTERS)})
     print("correct:", {l: int((labels == i).sum()) for i, l in enumerate(LETTERS)})
