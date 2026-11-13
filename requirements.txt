@@ -1,0 +1,9 @@
+# Python 3.12. torch from the CUDA 12.4 wheel index:
+#   pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0
+transformers==5.23.0
+datasets==5.2.0
+numpy==2.5.4
+matplotlib==3.11.2
+# only test_lora.py needs peft, to check lora.py against it
+peft==0.21.3
