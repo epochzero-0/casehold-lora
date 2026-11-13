@@ -49,3 +49,20 @@ The median context has 12 tokens after `<HOLDING>`, so cutting from the left kee
 - Test 1, at init against the base model: max abs difference 0.0.
 - Test 2, random A and B against `peft` holding the same tensors: max abs difference 0.0
   (the random weights moved the logits by up to 1.06, so the comparison isn't trivially zero).
+
+## Training
+
+One epoch, batch 4 with 4 batches per optimizer step (16 questions a step), lr 2e-4 with 5% warmup then
+linear decay, r = 16, alpha = 32, bf16 autocast. No setting was tuned. Each run's `metrics.json` and
+`log.csv` are in `runs/`.
+
+**Memory.** Batch 8 with float32 frozen weights ran out of the 6 GB. Batch 4 with float32 weights filled
+5.9 GB and slowed to under 4 questions a second. Storing the frozen weights in bf16 (A and B stay
+float32) brought the peak to 4.1 GiB.
+
+`python train.py --n_train 5000 --out runs/5k`
+
+| train questions | dev accuracy | time | peak VRAM |
+|---|---|---|---|
+| 0 (zero-shot) | 38.38% | | 1.42 GiB |
+| 5,000 | **75.28%** (2,936 of 3,900) | 627 s, 8.0 questions/s | 4.11 GiB |

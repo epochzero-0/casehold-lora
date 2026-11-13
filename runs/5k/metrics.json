@@ -1,0 +1,27 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B",
+  "n_train": 5000,
+  "dev_acc": 75.28,
+  "dev_correct": 2936,
+  "dev_n": 3900,
+  "train_secs": 627,
+  "gpu_hours": 0.174,
+  "peak_vram_gib": 4.11,
+  "optimizer_steps": 313,
+  "trainable_params": 2162688,
+  "args": {
+    "model": "Qwen/Qwen2.5-0.5B",
+    "n_train": 5000,
+    "out": "runs/5k",
+    "max_len": 640,
+    "batch_size": 4,
+    "accum": 4,
+    "lr": 0.0002,
+    "warmup": 0.05,
+    "r": 16,
+    "alpha": 32,
+    "eval_every": 100,
+    "quick_dev": 500,
+    "seed": 0
+  }
+}
