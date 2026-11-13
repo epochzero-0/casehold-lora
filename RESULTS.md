@@ -41,3 +41,11 @@ The median context has 12 tokens after `<HOLDING>`, so cutting from the left kee
 - Picks: A 503 · B 1,291 · C 1,638 · D 206 · E 262. Correct answers are spread evenly (760 to 804 each).
 - 98 s, peak VRAM 1.42 GiB.
 
+## LoRA checks
+
+`python test_lora.py` (r = 16, alpha = 32, on q/k/v/o of all 24 layers, 8 dev questions, float32)
+
+- 96 layers wrapped. Trainable: 2,162,688 of 496,195,456 (0.436%).
+- Test 1, at init against the base model: max abs difference 0.0.
+- Test 2, random A and B against `peft` holding the same tensors: max abs difference 0.0
+  (the random weights moved the logits by up to 1.06, so the comparison isn't trivially zero).
