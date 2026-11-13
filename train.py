@@ -38,8 +38,8 @@ def main():
     p.add_argument("--n_train", type=int, required=True)
     p.add_argument("--out", required=True)
     p.add_argument("--max_len", type=int, default=640)
-    p.add_argument("--batch_size", type=int, default=8)
-    p.add_argument("--accum", type=int, default=2, help="batches per optimizer step")
+    p.add_argument("--batch_size", type=int, default=4)
+    p.add_argument("--accum", type=int, default=4, help="batches per optimizer step")
     p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--warmup", type=float, default=0.05)
     p.add_argument("--r", type=int, default=16)
@@ -55,7 +55,8 @@ def main():
     device = "cuda"
 
     tok = AutoTokenizer.from_pretrained(args.model)
-    model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.float32).to(device)
+    # frozen weights in bf16, as Qwen ships them (1 GiB, against 2 in float32); A and B are float32
+    model = AutoModelForCausalLM.from_pretrained(args.model, dtype=torch.bfloat16).to(device)
     inject(model, args.r, args.alpha)
     trainable, total = count(model)
     print(f"trainable {trainable:,} of {total:,}", flush=True)
@@ -78,6 +79,18 @@ def main():
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda s: (s + 1) / warm if s < warm else max(0.0, (steps - s) / (steps - warm))
     )
+
+    # the longest batch first, forward and backward: if it fits, every batch fits
+    longest = sorted(range(len(rows)), key=lambda i: len(rows[i]))[-args.batch_size :]
+    ids, mask, last = collate([rows[i] for i in longest], tok.pad_token_id, device)
+    with torch.autocast("cuda", dtype=torch.bfloat16):
+        logits = letter_logits(model, ids, mask, last, letters)
+    F.cross_entropy(logits.float(), torch.tensor(labels[longest], device=device)).backward()
+    opt.zero_grad(set_to_none=True)
+    print(f"longest batch ({ids.shape[1]} tokens) fits: "
+          f"{torch.cuda.max_memory_allocated() / 2**30:.2f} GiB", flush=True)
+    del ids, mask, last, logits
+    torch.cuda.empty_cache()
 
     log = open(os.path.join(args.out, "log.csv"), "w")
     log.write("step,examples,loss,quick_dev_acc,secs\n")

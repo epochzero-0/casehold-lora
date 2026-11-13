@@ -20,13 +20,15 @@ class LoRALinear(nn.Module):
         for p in self.base.parameters():
             p.requires_grad = False
         w = base.weight
-        self.A = nn.Parameter(torch.empty(r, base.in_features, dtype=w.dtype, device=w.device))
-        self.B = nn.Parameter(torch.zeros(base.out_features, r, dtype=w.dtype, device=w.device))
+        # A and B stay float32 whatever the base is stored in: AdamW's small updates vanish in bf16
+        self.A = nn.Parameter(torch.empty(r, base.in_features, dtype=torch.float32, device=w.device))
+        self.B = nn.Parameter(torch.zeros(base.out_features, r, dtype=torch.float32, device=w.device))
         nn.init.kaiming_uniform_(self.A, a=math.sqrt(5))
         self.scale = alpha / r
 
     def forward(self, x):
-        return self.base(x) + (x @ self.A.T @ self.B.T) * self.scale
+        delta = (x.to(self.A.dtype) @ self.A.T @ self.B.T) * self.scale
+        return self.base(x) + delta.to(x.dtype)
 
 
 def inject(model, r=16, alpha=32, targets=TARGETS):
@@ -46,6 +48,15 @@ def inject(model, r=16, alpha=32, targets=TARGETS):
 def lora_state(model):
     """Only the trained tensors: this is the whole adapter."""
     return {k: v.detach().cpu() for k, v in model.state_dict().items() if k.endswith((".A", ".B"))}
+
+
+def load_adapter(model, path, r=16, alpha=32):
+    """Wrap the model and load trained A and B into it."""
+    inject(model, r, alpha)
+    state = torch.load(path, map_location="cpu")
+    missing, unexpected = model.load_state_dict(state, strict=False)
+    assert not unexpected and not [k for k in missing if k.endswith((".A", ".B"))]
+    return model
 
 
 def count(model):
