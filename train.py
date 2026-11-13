@@ -126,9 +126,10 @@ def main():
     train_secs = time.time() - t0
     peak = torch.cuda.max_memory_allocated() / 2**30
 
+    # saved before the full dev pass, so a run that dies during the pass keeps its weights
+    torch.save(lora_state(model), os.path.join(args.out, "adapter.pt"))
     preds, gold = evaluate(model, tok, dev, args.max_len, 16, device)
     dev_acc = 100 * (preds == gold).mean()
-    torch.save(lora_state(model), os.path.join(args.out, "adapter.pt"))
     metrics = {
         "model": args.model, "n_train": args.n_train, "dev_acc": round(float(dev_acc), 2),
         "dev_correct": int((preds == gold).sum()), "dev_n": int(len(gold)),
