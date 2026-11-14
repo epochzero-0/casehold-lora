@@ -65,4 +65,10 @@ float32) brought the peak to 4.1 GiB.
 | train questions | dev accuracy | time | peak VRAM |
 |---|---|---|---|
 | 0 (zero-shot) | 38.38% | | 1.42 GiB |
-| 5,000 | **75.28%** (2,936 of 3,900) | 627 s, 8.0 questions/s | 4.11 GiB |
+| 5,000 | 75.28% (2,936 of 3,900) | 627 s, 8.0 questions/s | 4.11 GiB |
+
+`python train.py --n_train 15000 --out runs/15k`
+
+| train questions | dev accuracy | time | peak VRAM |
+|---|---|---|---|
+| 15,000 | **80.33%** (3,133 of 3,900) | 1,642 s, 9.1 questions/s | 4.12 GiB |
