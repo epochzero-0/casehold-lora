@@ -1,0 +1,13 @@
+{
+  "note": "train.py was killed during its final dev pass, after saving the adapter, so it wrote no metrics. dev_acc is from `python eval.py --split validation --adapter runs/45k/adapter.pt --batch_size 8`; train_secs is the last row of log.csv; peak_vram_gib is the longest-batch check train.py printed at start.",
+  "model": "Qwen/Qwen2.5-0.5B",
+  "n_train": 45000,
+  "dev_acc": 87.05,
+  "dev_correct": 3395,
+  "dev_n": 3900,
+  "train_secs": 3736,
+  "gpu_hours": 1.038,
+  "peak_vram_gib": 4.34,
+  "optimizer_steps": 2813,
+  "trainable_params": 2162688
+}
