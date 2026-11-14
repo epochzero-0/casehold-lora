@@ -1,6 +1,33 @@
 # casehold-lora
 
-Qwen2.5-0.5B fine-tuned on CaseHOLD with a LoRA I wrote myself, in a plain PyTorch loop, on a 6 GB laptop GPU.
+I taught a small open-source language model to read US court opinions. It now scores 10 points above the
+published results of AI models built specifically for law, and it took 62 minutes to train on a laptop.
+
+| | |
+|---|---|
+| The test | A court opinion cites an earlier case. Pick which of five rulings it was citing. 3,600 questions the model never saw, from a benchmark built by Stanford researchers. |
+| My result | **85.92%** correct (3,093 of 3,600) |
+| Best legal-specialist model in the benchmark's published table | 75.4% |
+| The same model before I trained it | 38.38% |
+| Guessing | 20% |
+| What it cost | 62 minutes on a 6 GB laptop graphics card. 0.44% of the model's weights were trained. |
+
+What I built:
+
+- The fine-tuning method (LoRA) is written from scratch in about 30 lines of PyTorch. I tested it against the
+  standard Hugging Face library and the two give identical outputs.
+- The training loop is plain PyTorch with no training framework around it.
+- The first two attempts ran out of memory on a 6 GB card. The third fits in 4.1 GB.
+- The final score was measured once, on questions held back until the end, and compared against other
+  people's published numbers.
+
+Where to look:
+
+- [RESULTS.md](RESULTS.md): every number, with the command that printed it.
+- [DECISIONS.md](DECISIONS.md): what I chose at each step, the alternative, and why.
+- [The trained model on Hugging Face](https://huggingface.co/epochzero-0/casehold-lora).
+
+The rest of this page is the technical detail.
 
 ## The question
 
