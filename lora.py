@@ -53,7 +53,12 @@ def lora_state(model):
 def load_adapter(model, path, r=16, alpha=32):
     """Wrap the model and load trained A and B into it."""
     inject(model, r, alpha)
-    state = torch.load(path, map_location="cpu")
+    if str(path).endswith(".safetensors"):
+        from safetensors.torch import load_file
+
+        state = load_file(path)
+    else:
+        state = torch.load(path, map_location="cpu")
     missing, unexpected = model.load_state_dict(state, strict=False)
     assert not unexpected and not [k for k in missing if k.endswith((".A", ".B"))]
     return model

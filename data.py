@@ -1,6 +1,4 @@
 """CaseHOLD as one prompt per question: instruction, citing context, holdings A-E, "Answer:"."""
-from datasets import load_dataset
-
 MODEL = "Qwen/Qwen2.5-0.5B"
 LETTERS = "ABCDE"
 HEAD = (
@@ -10,6 +8,8 @@ HEAD = (
 
 
 def load():
+    from datasets import load_dataset  # here, so the demo can import the prompt code without it
+
     return load_dataset("coastalcph/lex_glue", "case_hold")
 
 
