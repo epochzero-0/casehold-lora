@@ -1,3 +1,7 @@
 __pycache__/
 *.pt
 *.log
+*.safetensors
+hub/lora.py
+hub/data.py
+hub/adapter_config.json
