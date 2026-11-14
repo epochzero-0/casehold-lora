@@ -71,4 +71,29 @@ float32) brought the peak to 4.1 GiB.
 
 | train questions | dev accuracy | time | peak VRAM |
 |---|---|---|---|
-| 15,000 | **80.33%** (3,133 of 3,900) | 1,642 s, 9.1 questions/s | 4.12 GiB |
+| 15,000 | 80.33% (3,133 of 3,900) | 1,642 s, 9.1 questions/s | 4.12 GiB |
+
+`python train.py --n_train 45000 --eval_every 200 --out runs/45k`
+
+The run was killed during its final dev pass, after the adapter was saved, when the laptop ran low on RAM.
+The dev score is from the saved adapter:
+`python eval.py --split validation --adapter runs/45k/adapter.pt --batch_size 8`
+
+| train questions | dev accuracy | time | peak VRAM |
+|---|---|---|---|
+| 45,000 | **87.05%** (3,395 of 3,900) | 3,736 s, 12.0 questions/s | 4.34 GiB (longest batch) |
+
+After training the picks are even across the letters (A 794 · B 767 · C 780 · D 767 · E 792); zero-shot they
+were 75% B or C.
+
+## Test
+
+The 45k run is the best on dev, so it is the one scored on test. Run once:
+
+`python eval.py --split test --adapter runs/45k/adapter.pt --batch_size 8`
+
+- **85.92% on test** (3,093 of 3,600), 87 s, peak VRAM 1.12 GiB.
+- 1.04 GPU-hours of training on an RTX 4050 Laptop GPU.
+
+Published CaseHOLD test scores from the LexGLUE table (Chalkidis et al., 2022): TF-IDF+SVM 22.4 · BERT 70.8 ·
+RoBERTa-large 74.4 · Legal-BERT 75.3 · CaseLaw-BERT 75.4.
