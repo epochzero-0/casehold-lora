@@ -36,7 +36,6 @@ passage from a US court opinion with one cited holding removed, pick that holdin
 
 Code, every number with the command that printed it, and the decisions behind the build:
 [github.com/epochzero-0/casehold-lora](https://github.com/epochzero-0/casehold-lora).
-Demo: [epochzero-0/casehold-lora-demo](https://huggingface.co/spaces/epochzero-0/casehold-lora-demo).
 
 ## Results
 
